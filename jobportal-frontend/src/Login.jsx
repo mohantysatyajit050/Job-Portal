@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import api from "./api/api";
-import "./Login.css";
 
 function Login() {
   const navigate = useNavigate();
@@ -21,8 +20,6 @@ function Login() {
     try {
       const res = await api.post("users/login/", form);
 
-      console.log("LOGIN RESPONSE:", res.data);
-
       const { token, role, username } = res.data;
 
       if (!token || !role) {
@@ -37,19 +34,16 @@ function Login() {
 
       alert("Login successful");
 
-      // ✅ FIXED NAVIGATION (NO Navigate component)
+      // ✅ Redirect based on role
       if (role === "employer") {
-       navigate("/dashboard/employer");
+        navigate("/dashboard/employer");
       } else if (role === "jobseeker") {
-       navigate("/dashboard/home");
-
+        navigate("/dashboard/home");
       } else {
         navigate("/");
       }
 
     } catch (err) {
-      console.error("LOGIN ERROR:", err);
-
       if (err.response && err.response.data) {
         alert(err.response.data.error || "Login failed");
       } else {
@@ -59,49 +53,61 @@ function Login() {
   };
 
   return (
-    <div className="login-page">
-      <form className="login-form" onSubmit={handleSubmit}>
-        <h2>Login</h2>
+    <div
+      className="container d-flex justify-content-center align-items-center"
+      style={{ minHeight: "90vh" }}
+    >
+      <div className="card shadow p-4" style={{ width: "100%", maxWidth: "400px" }}>
+        
+        <h3 className="text-center mb-4 fw-bold">Login</h3>
 
-        <div className="input-group">
-          <input
-            name="username"
-            placeholder="Username"
-            onChange={handleChange}
-            required
-          />
-        </div>
+        <form onSubmit={handleSubmit}>
 
-        <div className="input-group">
-          <input
-            name="password"
-            type="password"
-            placeholder="Password"
-            onChange={handleChange}
-            required
-          />
-        </div>
+          {/* Username */}
+          <div className="mb-3">
+            <label className="form-label">Username</label>
+            <input
+              type="text"
+              name="username"
+              className="form-control"
+              placeholder="Enter username"
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-        <button type="submit">Login</button>
+          {/* Password */}
+          <div className="mb-3">
+            <label className="form-label">Password</label>
+            <input
+              type="password"
+              name="password"
+              className="form-control"
+              placeholder="Enter password"
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-        <div className="divider">
-          <span>OR</span>
-        </div>
+          {/* Button */}
+          <button type="submit" className="btn btn-primary w-100">
+            Login
+          </button>
 
-        <p>
+        </form>
+
+        {/* Divider */}
+        <div className="text-center my-3 text-muted">OR</div>
+
+        {/* Register link */}
+        <p className="text-center mb-0">
           Don't have an account?{" "}
-          <span
-            style={{
-              color: "#a5b4fc",
-              cursor: "pointer",
-              fontWeight: "500",
-            }}
-            onClick={() => navigate("/register")}
-          >
+          <Link to="/register" className="text-decoration-none">
             Register
-          </span>
+          </Link>
         </p>
-      </form>
+
+      </div>
     </div>
   );
 }

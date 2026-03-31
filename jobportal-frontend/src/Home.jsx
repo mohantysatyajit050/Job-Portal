@@ -1,181 +1,190 @@
-import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Home.css";
 
 function Home() {
   const navigate = useNavigate();
 
-  const [scrollY, setScrollY] = useState(0);
-  const [countersVisible, setCountersVisible] = useState(false);
-  const statsRef = useRef(null);
-
-  // 🔥 Scroll + Counter logic (kept from your code)
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrollY(window.scrollY);
-
-      if (statsRef.current) {
-        const rect = statsRef.current.getBoundingClientRect();
-        const isVisible =
-          rect.top < window.innerHeight && rect.bottom >= 0;
-
-        if (isVisible && !countersVisible) {
-          setCountersVisible(true);
-        }
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [countersVisible]);
-
-  // 🔥 Redirect to login
-  const goToLogin = () => {
-    navigate("/login");
-  };
-  const goToRegister = () => {
-  navigate("/register");
-};
-
-  // 🔥 Smooth scroll (optional)
-  const scrollToSection = (id) => {
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: "smooth" });
-  };
+  const token = localStorage.getItem("token"); // ✅ check login
 
   return (
-    <div className="home">
+    <div>
 
-      {/* 🔥 SIMPLE HEADER (NO NAV MENU) */}
-      <div className="topbar">
-        <h2 className="logo">JobPortal</h2>
+      {/* 🔥 HERO SECTION */}
+      <div className="bg-light py-5">
+        <div className="container text-center">
 
-        <div className="auth-buttons">
-          <button className="login-btn" onClick={goToLogin}>
-            Login
-          </button>
-          <button className="register-btn" onClick={goToRegister}>
-            Register
-          </button>
+          <h1 className="fw-bold display-5">
+            Find Your Dream Job 🚀
+          </h1>
+
+          <p className="text-muted fs-5">
+            Explore thousands of jobs and connect with top companies
+          </p>
+
+          {/* 🔍 SEARCH BAR */}
+          <div className="row justify-content-center mt-4 g-2">
+
+            <div className="col-md-4">
+              <input
+                className="form-control form-control-lg"
+                placeholder="🔎 Skills (e.g. React, Python)"
+              />
+            </div>
+
+            <div className="col-md-3">
+              <input
+                className="form-control form-control-lg"
+                placeholder="📍 Location"
+              />
+            </div>
+
+            <div className="col-md-2">
+              <button
+                className="btn btn-primary btn-lg w-100"
+                onClick={() => navigate("/login")}
+              >
+                Search
+              </button>
+            </div>
+
+          </div>
+
+          {/* ✅ CONDITIONAL BUTTONS */}
+          {!token && (
+            <div className="mt-4">
+              <button
+                className="btn btn-success btn-lg me-2"
+                onClick={() => navigate("/register")}
+              >
+                Get Started
+              </button>
+
+              <button
+                className="btn btn-outline-primary btn-lg"
+                onClick={() => navigate("/login")}
+              >
+                Login
+              </button>
+            </div>
+          )}
+
         </div>
       </div>
 
-      {/* 🔥 HERO SECTION */}
-      <section className="hero">
-        <div className="hero-content">
-          <h1>
-            Find your dream job <span className="highlight">🚀</span>
-          </h1>
-          <p>
-            Explore thousands of jobs and connect with top companies.
-          </p>
+      {/* 🔥 FEATURES */}
+      <div className="container py-5">
 
-          {/* 🔥 SEARCH BAR */}
-          <div className="search-bar">
-            <input placeholder="Enter skills / designation" />
-            <input placeholder="Location" />
-            <button onClick={goToLogin}>Search</button>
+        <h2 className="text-center fw-bold mb-4">
+          Why Choose Us?
+        </h2>
+
+        <div className="row text-center g-4">
+
+          <div className="col-md-4">
+            <div className="p-4 shadow-sm rounded bg-white h-100">
+              <h5>🚀 Fast Hiring</h5>
+              <p className="text-muted">
+                Apply and get hired faster with top companies.
+              </p>
+            </div>
           </div>
 
-          {/* 🔥 CATEGORY BUTTONS */}
-          <div className="categories">
-            <button onClick={goToLogin}>Remote</button>
-            <button onClick={goToLogin}>MNC</button>
-            <button onClick={goToLogin}>Engineering</button>
-            <button onClick={goToLogin}>Startup</button>
-            <button onClick={goToLogin}>Fresher</button>
+          <div className="col-md-4">
+            <div className="p-4 shadow-sm rounded bg-white h-100">
+              <h5>🔒 Secure Platform</h5>
+              <p className="text-muted">
+                Your data and resume are safe with us.
+              </p>
+            </div>
           </div>
 
-          {/* 🔥 HERO BUTTONS */}
-          <div className="hero-buttons">
-            <button onClick={goToLogin} className="primary-btn">
-              Get Started
-            </button>
-            <button
-              onClick={() => scrollToSection("about")}
-              className="secondary-btn"
-            >
-              Learn More
-            </button>
+          <div className="col-md-4">
+            <div className="p-4 shadow-sm rounded bg-white h-100">
+              <h5>🌍 Top Companies</h5>
+              <p className="text-muted">
+                Connect with leading companies worldwide.
+              </p>
+            </div>
           </div>
+
         </div>
-      </section>
+      </div>
 
-      {/* 🔥 ABOUT SECTION */}
-      <section id="about" className="about">
-        <div className="section-header">
-          <h2>Why Choose Our Job Portal?</h2>
-          <div className="divider"></div>
+      {/* 🔥 TOP COMPANIES */}
+      <div className="bg-light py-5">
+        <div className="container text-center">
+
+          <h3 className="fw-bold mb-4">
+            Top Companies Hiring
+          </h3>
+
+          <div className="row g-3">
+
+            {["Google", "Amazon", "Infosys", "TCS"].map((c, i) => (
+              <div className="col-md-3" key={i}>
+                <div
+                  className="card shadow-sm border-0 h-100"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => navigate("/login")}
+                >
+                  <div className="card-body d-flex align-items-center justify-content-center fw-bold">
+                    {c}
+                  </div>
+                </div>
+              </div>
+            ))}
+
+          </div>
+
         </div>
+      </div>
 
-        <div className="about-content">
-          <div className="about-text">
-            <p>
-              We connect job seekers with companies efficiently. Build your
-              career and hire the best talent easily.
-            </p>
-            <button onClick={goToLogin} className="primary-btn">
-              Explore Opportunities
-            </button>
+      {/* 🔥 STATS */}
+      <div className="container py-5 text-center">
+
+        <h3 className="fw-bold mb-4">
+          Our Impact
+        </h3>
+
+        <div className="row">
+
+          <div className="col-md-4 mb-3">
+            <h2 className="fw-bold text-primary">50,000+</h2>
+            <p className="text-muted">Jobs</p>
           </div>
+
+          <div className="col-md-4 mb-3">
+            <h2 className="fw-bold text-success">10,000+</h2>
+            <p className="text-muted">Companies</p>
+          </div>
+
+          <div className="col-md-4 mb-3">
+            <h2 className="fw-bold text-warning">1M+</h2>
+            <p className="text-muted">Users</p>
+          </div>
+
         </div>
-      </section>
+      </div>
 
-      {/* 🔥 COMPANY SECTION */}
-      <section className="companies">
-        <h2>Top companies hiring now</h2>
+      {/* 🔥 FINAL CTA */}
+      <div className="bg-primary text-white text-center py-5">
 
-        <div className="company-grid">
-          <div className="company-card" onClick={goToLogin}>
-            Google
-          </div>
-          <div className="company-card" onClick={goToLogin}>
-            Amazon
-          </div>
-          <div className="company-card" onClick={goToLogin}>
-            Infosys
-          </div>
-          <div className="company-card" onClick={goToLogin}>
-            TCS
-          </div>
-        </div>
-      </section>
+        <h2 className="fw-bold">Start Your Career Today</h2>
 
-      {/* 🔥 CTA SECTION */}
-      <section className="cta">
-        <div className="cta-content">
-          <h2>Start Your Journey Today</h2>
-          <p>Login to explore jobs</p>
+        <p className="mb-4">
+          Join thousands of professionals finding jobs daily.
+        </p>
 
-          <button onClick={goToLogin} className="primary-btn">
-            Login to Continue
+        {/* ✅ HIDE BUTTON WHEN LOGGED IN */}
+        {!token && (
+          <button
+            className="btn btn-light btn-lg"
+            onClick={() => navigate("/register")}
+          >
+            Get Started
           </button>
-        </div>
-      </section>
+        )}
 
-      {/* 🔥 STATS SECTION */}
-      <section id="stats" ref={statsRef} className="stats">
-        <div className="stat-card">
-          <div className="stat-number">
-            {countersVisible ? "50000+" : "0"}
-          </div>
-          <div className="stat-label">Job Listings</div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-number">
-            {countersVisible ? "10000+" : "0"}
-          </div>
-          <div className="stat-label">Companies</div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-number">
-            {countersVisible ? "1000000+" : "0"}
-          </div>
-          <div className="stat-label">Users</div>
-        </div>
-      </section>
+      </div>
 
     </div>
   );

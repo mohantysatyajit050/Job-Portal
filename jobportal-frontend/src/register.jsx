@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "./api/api";
-import "./register.css";
 
 function Register() {
   const navigate = useNavigate();
@@ -13,15 +12,12 @@ function Register() {
     role: "",
   });
 
-  // ✅ FIX ADDED HERE
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    console.log("FORM DATA:", form);
 
     if (!form.role) {
       alert("Please select a role");
@@ -30,13 +26,9 @@ function Register() {
 
     try {
       const res = await api.post("users/register/", form);
-
       alert(res.data.message || "Registered successfully");
-      navigate("/");
-
+      navigate("/login");
     } catch (err) {
-      console.error("REGISTER ERROR:", err);
-
       if (err.response && err.response.data) {
         alert(err.response.data.error);
       } else {
@@ -46,61 +38,84 @@ function Register() {
   };
 
   return (
-    <div className="register-page">
-      <div className="register-card">
-        <h2 className="register-title">Create Account</h2>
+    <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: "90vh" }}>
+      
+      <div className="card shadow p-4" style={{ width: "100%", maxWidth: "400px" }}>
+        
+        <h3 className="text-center mb-4 fw-bold">Create Account</h3>
 
         <form onSubmit={handleSubmit}>
+
+          {/* Username */}
           <div className="mb-3">
+            <label className="form-label">Username</label>
             <input
+              type="text"
               name="username"
+              className="form-control"
               placeholder="Enter username"
               onChange={handleChange}
               required
             />
           </div>
 
+          {/* Email */}
           <div className="mb-3">
+            <label className="form-label">Email</label>
             <input
-              name="email"
               type="email"
+              name="email"
+              className="form-control"
               placeholder="Enter email"
               onChange={handleChange}
               required
             />
           </div>
 
+          {/* Password */}
           <div className="mb-3">
+            <label className="form-label">Password</label>
             <input
-              name="password"
               type="password"
+              name="password"
+              className="form-control"
               placeholder="Enter password"
               onChange={handleChange}
               required
             />
           </div>
 
+          {/* Role */}
           <div className="mb-3">
+            <label className="form-label">Select Role</label>
             <select
               name="role"
+              className="form-select"
               value={form.role}
               onChange={handleChange}
               required
             >
-              <option value="">Select Role</option>
+              <option value="">Choose...</option>
               <option value="jobseeker">Job Seeker</option>
               <option value="employer">Employer</option>
             </select>
           </div>
 
-          <button className="register-btn">
+          {/* Button */}
+          <button className="btn btn-primary w-100">
             Register
           </button>
+
         </form>
 
-        <div className="register-link">
-          Already have an account? <Link to="/">Login</Link>
-        </div>
+        {/* Login Link */}
+        <p className="text-center mt-3 mb-0">
+          Already have an account?{" "}
+          <Link to="/login" className="text-decoration-none">
+            Login
+          </Link>
+        </p>
+
       </div>
     </div>
   );
