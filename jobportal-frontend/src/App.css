@@ -1,0 +1,11 @@
+/* App.css (GLOBAL ONLY) */
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+/* Optional global reset */
+* {
+  box-sizing: border-box;
+}

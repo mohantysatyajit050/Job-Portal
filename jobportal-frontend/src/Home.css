@@ -1,0 +1,263 @@
+/* 🌍 Base */
+.home {
+  font-family: "Poppins", sans-serif;
+  color: #000;
+  background: #f5f7fb;
+}
+
+/* 🔝 Topbar (like Naukri) */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  background: #ffffff;
+  border-bottom: 1px solid #eee;
+}
+
+.logo {
+  color: #4f46e5;
+  font-weight: 700;
+  font-size: 24px;
+}
+
+.auth-buttons button {
+  margin-left: 10px;
+  padding: 8px 18px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.login-btn {
+  background: transparent;
+  border: 1px solid #4f46e5;
+  color: #4f46e5;
+}
+
+.login-btn:hover {
+  background: #4f46e5;
+  color: white;
+}
+
+.register-btn {
+  background: #ff5a3c;
+  color: white;
+}
+
+.register-btn:hover {
+  background: #e14b2f;
+}
+
+/* 🔥 HERO */
+.hero {
+  text-align: center;
+  padding: 100px 20px;
+  background: linear-gradient(135deg, #eef2ff, #f5f7fb);
+}
+
+.hero h1 {
+  font-size: 42px;
+  margin-bottom: 10px;
+}
+
+.highlight {
+  color: #ff5a3c;
+}
+
+.hero p {
+  color: #555;
+  font-size: 18px;
+  margin-bottom: 25px;
+}
+
+/* 🔍 Search Bar */
+.search-bar {
+  margin-top: 20px;
+}
+
+.search-bar input {
+  padding: 12px;
+  margin: 5px;
+  width: 220px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.search-bar button {
+  padding: 12px 20px;
+  background: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.search-bar button:hover {
+  background: #4338ca;
+}
+
+/* 🧩 Categories */
+.categories {
+  margin-top: 20px;
+}
+
+.categories button {
+  margin: 6px;
+  padding: 10px 16px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  background: white;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.categories button:hover {
+  background: #4f46e5;
+  color: white;
+}
+
+/* 🔘 Buttons */
+.hero-buttons {
+  margin-top: 30px;
+}
+
+.primary-btn,
+.secondary-btn {
+  padding: 12px 25px;
+  border-radius: 8px;
+  margin: 5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primary-btn {
+  background: #4f46e5;
+  color: white;
+  border: none;
+}
+
+.primary-btn:hover {
+  background: #4338ca;
+}
+
+.secondary-btn {
+  background: transparent;
+  border: 2px solid #4f46e5;
+  color: #4f46e5;
+}
+
+.secondary-btn:hover {
+  background: #4f46e5;
+  color: white;
+}
+
+/* 🏢 Companies Section */
+.companies {
+  padding: 60px 20px;
+  text-align: center;
+  background: white;
+}
+
+.companies h2 {
+  margin-bottom: 30px;
+}
+
+.company-grid {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.company-card {
+  padding: 20px 30px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+  background: #fafafa;
+}
+
+.company-card:hover {
+  transform: translateY(-5px);
+  background: #eef2ff;
+}
+
+/* 📢 About */
+.about {
+  padding: 60px 20px;
+  background: #f9fafb;
+  text-align: center;
+}
+
+.section-header h2 {
+  font-size: 30px;
+}
+
+.divider {
+  width: 60px;
+  height: 3px;
+  background: #4f46e5;
+  margin: 10px auto;
+}
+
+.about-text p {
+  max-width: 600px;
+  margin: 20px auto;
+  color: #555;
+}
+
+/* 📊 Stats */
+.stats {
+  padding: 50px 20px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 30px;
+  background: linear-gradient(135deg, #4f46e5, #9333ea);
+  color: white;
+}
+
+.stat-card {
+  text-align: center;
+  min-width: 180px;
+}
+
+.stat-number {
+  font-size: 36px;
+  font-weight: bold;
+}
+
+.stat-label {
+  margin-top: 5px;
+}
+
+/* 📣 CTA */
+.cta {
+  padding: 60px 20px;
+  text-align: center;
+  background: #4f46e5;
+  color: white;
+}
+
+.cta p {
+  margin: 10px 0 20px;
+}
+
+/* 📱 Responsive */
+@media (max-width: 768px) {
+  .hero h1 {
+    font-size: 28px;
+  }
+
+  .search-bar input {
+    width: 90%;
+  }
+
+  .company-grid {
+    flex-direction: column;
+    align-items: center;
+  }
+}
