@@ -12,6 +12,9 @@ function Register() {
     role: "",
   });
 
+  const [message, setMessage] = useState(null); // ✅ success
+  const [error, setError] = useState(null);     // ❌ error
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -20,29 +23,56 @@ function Register() {
     e.preventDefault();
 
     if (!form.role) {
-      alert("Please select a role");
+      setError("Please select a role");
+      setMessage(null);
       return;
     }
 
     try {
       const res = await api.post("users/register/", form);
-      alert(res.data.message || "Registered successfully");
-      navigate("/login");
+
+      setMessage(res.data.message || "Registered successfully!");
+      setError(null);
+
+      // ✅ Redirect after short delay
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
+
     } catch (err) {
-      if (err.response && err.response.data) {
-        alert(err.response.data.error);
-      } else {
-        alert("Server error. Please try again.");
-      }
+      const errorMsg =
+        err.response?.data?.error || "Server error. Please try again.";
+
+      setError(errorMsg);
+      setMessage(null);
     }
   };
 
   return (
-    <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: "90vh" }}>
-      
-      <div className="card shadow p-4" style={{ width: "100%", maxWidth: "400px" }}>
-        
+    <div
+      className="container d-flex justify-content-center align-items-center"
+      style={{ minHeight: "90vh" }}
+    >
+      <div
+        className="card shadow p-4"
+        style={{ width: "100%", maxWidth: "400px" }}
+      >
+
         <h3 className="text-center mb-4 fw-bold">Create Account</h3>
+
+        {/* ✅ SUCCESS MESSAGE */}
+        {message && (
+          <div className="alert alert-success text-center">
+            {message}
+          </div>
+        )}
+
+        {/* ❌ ERROR MESSAGE */}
+        {error && (
+          <div className="alert alert-danger text-center">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
 

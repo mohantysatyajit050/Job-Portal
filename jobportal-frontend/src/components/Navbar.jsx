@@ -1,103 +1,73 @@
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Navbar() {
   const navigate = useNavigate();
-  const location = useLocation();
 
   const token = localStorage.getItem("token");
-  const role = localStorage.getItem("role");
+  const username = localStorage.getItem("username");
 
   const handleLogout = () => {
     localStorage.clear();
     navigate("/login");
   };
 
-  const isActive = (path) => location.pathname === path;
-
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark px-4">
+    <nav className="navbar navbar-dark bg-dark px-3 d-flex justify-content-between">
 
+      {/* LEFT SIDE */}
       <Link className="navbar-brand fw-bold" to="/">
         JobPortal
       </Link>
 
-      <button
-        className="navbar-toggler"
-        data-bs-toggle="collapse"
-        data-bs-target="#navMenu"
-      >
-        <span className="navbar-toggler-icon"></span>
-      </button>
+      {/* RIGHT SIDE */}
+      <div className="d-flex align-items-center gap-2">
 
-      <div className="collapse navbar-collapse" id="navMenu">
+        {/* NOT LOGGED IN */}
+        {!token && (
+          <>
+            <Link className="btn btn-outline-light btn-sm" to="/login">
+              Login
+            </Link>
 
-        <ul className="navbar-nav ms-auto">
+            <Link className="btn btn-success btn-sm" to="/register">
+              Register
+            </Link>
+          </>
+        )}
 
-          {/* 🌐 PUBLIC */}
-          {!token && (
-            <>
-              <li className="nav-item">
-                <Link
-                  className={`nav-link ${isActive("/login") ? "active" : ""}`}
-                  to="/login"
+        {/* LOGGED IN */}
+        {token && (
+          <div className="dropdown">
+            {/* ✅ FIXED BUTTON */}
+            <button
+              className="btn btn-secondary dropdown-toggle d-flex align-items-center"
+              type="button"
+              data-bs-toggle="dropdown"   // ✅ REQUIRED
+              aria-expanded="false"       // ✅ REQUIRED
+            >
+              👤 {username || "User"}
+            </button>
+
+            <ul className="dropdown-menu dropdown-menu-end">
+              <li>
+                <span className="dropdown-item-text">
+                  Signed in as <b>{username || "User"}</b>
+                </span>
+              </li>
+
+              <li><hr className="dropdown-divider" /></li>
+
+              <li>
+                <button
+                  className="dropdown-item text-danger"
+                  onClick={handleLogout}
                 >
-                  Login
-                </Link>
+                  🚪 Logout
+                </button>
               </li>
-
-              <li className="nav-item">
-                <Link
-                  className={`nav-link ${isActive("/register") ? "active" : ""}`}
-                  to="/register"
-                >
-                  Register
-                </Link>
-              </li>
-            </>
-          )}
-
-          {/* 🔐 JOBSEEKER */}
-          {token && role === "jobseeker" && (
-            <>
-              <li className="nav-item">
-                <Link className="nav-link" to="/dashboard/home">
-                  Dashboard
-                </Link>
-              </li>
-
-              <li className="nav-item">
-                <Link className="nav-link" to="/dashboard/jobs">
-                  Jobs
-                </Link>
-              </li>
-
-              <li className="nav-item">
-                <Link className="nav-link" to="/dashboard/profile">
-                  Profile
-                </Link>
-              </li>
-            </>
-          )}
-
-          {/* 🔐 EMPLOYER */}
-          {token && role === "employer" && (
-            <li className="nav-item">
-              <Link className="nav-link" to="/dashboard/employer">
-                Dashboard
-              </Link>
-            </li>
-          )}
-
-          {/* 🔐 LOGOUT */}
-          {token && (
-            <li className="nav-item">
-              <button onClick={handleLogout} className="btn btn-danger ms-3">
-                Logout
-              </button>
-            </li>
-          )}
-
-        </ul>
+            </ul>
+          </div>
+        )}
 
       </div>
     </nav>

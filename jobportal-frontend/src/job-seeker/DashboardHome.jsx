@@ -1,258 +1,111 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import api from "../api/api";
-import "./Dashboard.css";
-
-// Keep your ACTIVITY DATA (no change)
-const ACTIVITY_DATA = [
-  { label: "Company Approaches", value: 8, icon: "📩", color: "#6c63ff" },
-  { label: "Jobs Applied", value: 12, icon: "📋", color: "#00c9a7" },
-  { label: "Shortlisted", value: 5, icon: "⭐", color: "#ffd166" },
-  { label: "Interviews", value: 3, icon: "🎯", color: "#ef476f" },
-];
-
-// (BarChart & MeritScore remain SAME — no change)
+import { useState } from "react";
+import Jobs from "./Jobs";
+import Profile from "./Profile";
 
 function DashboardHome() {
-  const navigate = useNavigate();
+  const [tab, setTab] = useState("dashboard");
 
-  const [selectedJob, setSelectedJob] = useState(null);
-  const [profileComplete, setProfileComplete] = useState(true);
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // ✅ Close sidebar function (important for mobile)
+  const closeSidebar = () => {
+    const offcanvasEl = document.getElementById("sidebar");
+    const bsOffcanvas =
+      window.bootstrap?.Offcanvas?.getInstance(offcanvasEl);
 
-  const [jobs, setJobs] = useState([]);              // ✅ NEW (real jobs)
-  const [files, setFiles] = useState({});            // ✅ NEW (per job file)
-  const [appliedJobs, setAppliedJobs] = useState([]);
-
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("jobs");
-  const [notification, setNotification] = useState(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const profileRes = await api.get("/users/profile/");
-        setProfile(profileRes.data);
-        setProfileComplete(profileRes.data.is_complete);
-
-        // ✅ Fetch jobs from backend
-        let jobRes;
-        try {
-          jobRes = await api.get("/jobs/filter/");
-        } catch {
-          jobRes = await api.get("/jobs/");
-        }
-
-        setJobs(jobRes.data || []);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  // ✅ FILTER LOGIC (UPDATED FOR BACKEND DATA)
-  const filteredJobs = (() => {
-    let list = jobs;
-
-    if (searchQuery) {
-      list = list.filter(
-        (j) =>
-          j.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          j.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          j.skills_required?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+    if (bsOffcanvas) {
+      bsOffcanvas.hide();
     }
-
-    return list;
-  })();
-
-  const meritScore = Math.min(
-    100,
-    40 +
-      (profile?.skills?.length || 0) * 4 +
-      (profile?.courses?.length || 0) * 3 +
-      appliedJobs.length * 2
-  );
-
-  const showNotif = (msg) => {
-    setNotification(msg);
-    setTimeout(() => setNotification(null), 3000);
   };
 
-  // ✅ APPLY FUNCTION (CONNECTED TO BACKEND)
-  const handleApply = async (job) => {
-    const file = files[job.id];
+  const handleTabChange = (tabName) => {
+    setTab(tabName);
+    closeSidebar();
+  };
 
-    if (!file) {
-      alert("Upload resume first 📄");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("resume", file);
-
-    try {
-      await api.post(`jobs/apply/${job.id}/`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      setAppliedJobs((prev) => [...prev, job.id]);
-      showNotif(`Applied to ${job.title} ✅`);
-    } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.message || "Already applied ❌");
+  const renderContent = () => {
+    switch (tab) {
+      case "dashboard":
+        return <h3>🏠 Dashboard Content</h3>;
+      case "jobs":
+        return <Jobs />;
+      case "profile":
+        return <Profile />;
+      case "activity":
+        return <h3>📊 Activity Content</h3>;
+      default:
+        return null;
     }
   };
 
   return (
-    <div className="dash-root">
-      {notification && <div className="toast">{notification}</div>}
+    <div className="container-fluid">
+      <div className="row">
 
-      <aside className="dash-sidebar">
-        <div className="sidebar-logo">⚡ JobPulse</div>
+        {/* 🔹 MOBILE TOP BAR (HAMBURGER) */}
+        <nav className="navbar navbar-dark bg-dark d-md-none w-100">
+          <div className="container-fluid">
+            <button
+              className="navbar-toggler"
+              type="button"
+              data-bs-toggle="offcanvas"
+              data-bs-target="#sidebar"
+            >
+              ☰
+            </button>
+            <span className="navbar-brand">JobSeeker</span>
+          </div>
+        </nav>
 
-        <nav className="sidebar-nav">
+        {/* 🔹 SIDEBAR */}
+        <div
+          className="offcanvas-md offcanvas-start bg-dark text-white col-md-2 p-3"
+          id="sidebar"
+          style={{ minHeight: "100vh" }}
+        >
+          <h5 className="mb-4">JobSeeker</h5>
+
           <button
-            className={`nav-item ${activeTab === "jobs" ? "active" : ""}`}
-            onClick={() => setActiveTab("jobs")}
+            className={`btn btn-dark w-100 text-start mb-2 ${
+              tab === "dashboard" && "bg-secondary"
+            }`}
+            onClick={() => handleTabChange("dashboard")}
           >
             🏠 Dashboard
           </button>
 
           <button
-            className={`nav-item ${activeTab === "activity" ? "active" : ""}`}
-            onClick={() => setActiveTab("activity")}
+            className={`btn btn-dark w-100 text-start mb-2 ${
+              tab === "jobs" && "bg-secondary"
+            }`}
+            onClick={() => handleTabChange("jobs")}
+          >
+            📋 Jobs
+          </button>
+
+          <button
+            className={`btn btn-dark w-100 text-start mb-2 ${
+              tab === "profile" && "bg-secondary"
+            }`}
+            onClick={() => handleTabChange("profile")}
+          >
+            👤 Profile
+          </button>
+
+          <button
+            className={`btn btn-dark w-100 text-start mb-2 ${
+              tab === "activity" && "bg-secondary"
+            }`}
+            onClick={() => handleTabChange("activity")}
           >
             📊 Activity
           </button>
-        </nav>
-
-        <div className="sidebar-bottom">
-          <button className="nav-item" onClick={() => navigate("/profile")}>
-            👤 Profile
-          </button>
         </div>
-      </aside>
 
-      <main className="dash-main">
-        <header className="dash-topbar">
-          <div className="topbar-left">
-            <h2>Job Recommendations</h2>
-            <p>{filteredJobs.length} jobs found</p>
-          </div>
+        {/* 🔹 CONTENT AREA */}
+        <div className="col-12 col-md-10 p-4">
+          {renderContent()}
+        </div>
 
-          <div className="topbar-right">
-            {profile && (
-              <div className="user-chip">
-                <div className="user-avatar">
-                  {profile.username?.[0]?.toUpperCase()}
-                </div>
-                <span>{profile.username}</span>
-              </div>
-            )}
-          </div>
-        </header>
-
-        {!loading && !profileComplete && (
-          <div className="profile-alert">
-            <div className="alert-icon">⚠️</div>
-            <div className="alert-text">
-              <strong>Your profile is incomplete!</strong>
-              <p>Add skills & resume</p>
-            </div>
-            <button onClick={() => navigate("/profile")}>
-              Complete Now →
-            </button>
-          </div>
-        )}
-
-        {/* JOBS TAB */}
-        {activeTab === "jobs" && (
-          <>
-            <div className="search-bar">
-              <input
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-
-            <div className="jobs-layout">
-              {/* LEFT LIST */}
-              <div className="job-list-panel">
-                {filteredJobs.map((job) => {
-                  const isApplied = appliedJobs.includes(job.id);
-
-                  return (
-                    <div
-                      key={job.id}
-                      className={`job-card-new ${
-                        selectedJob?.id === job.id ? "selected" : ""
-                      }`}
-                      onClick={() => setSelectedJob(job)}
-                    >
-                      <h4>{job.title}</h4>
-                      <p>{job.company} · {job.location}</p>
-
-                      {isApplied && <span>Applied ✓</span>}
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* RIGHT DETAIL */}
-              <div className="job-detail-panel">
-                {selectedJob ? (
-                  <div className="job-detail-inner">
-                    <h2>{selectedJob.title}</h2>
-                    <p>{selectedJob.company}</p>
-
-                    <p>📍 {selectedJob.location}</p>
-                    <p>💰 {selectedJob.salary}</p>
-
-                    <h4>Skills</h4>
-                    <p>{selectedJob.skills_required}</p>
-
-                    <h4>Description</h4>
-                    <p>{selectedJob.description}</p>
-
-                    {/* ✅ FILE INPUT */}
-                    <input
-                      type="file"
-                      onChange={(e) =>
-                        setFiles({
-                          ...files,
-                          [selectedJob.id]: e.target.files[0],
-                        })
-                      }
-                    />
-
-                    <button
-                      onClick={() => handleApply(selectedJob)}
-                      disabled={appliedJobs.includes(selectedJob.id)}
-                    >
-                      {appliedJobs.includes(selectedJob.id)
-                        ? "Applied"
-                        : "Apply"}
-                    </button>
-                  </div>
-                ) : (
-                  <p>Select a job</p>
-                )}
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* ACTIVITY TAB (UNCHANGED) */}
-      </main>
+      </div>
     </div>
   );
 }

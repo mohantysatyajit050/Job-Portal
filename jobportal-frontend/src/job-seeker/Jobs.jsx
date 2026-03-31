@@ -3,13 +3,7 @@ import api from "../api/api";
 
 function Jobs() {
   const [jobs, setJobs] = useState([]);
-
-  // ❌ OLD: single file
-  // const [file, setFile] = useState(null);
-
-  // ✅ NEW: store file per job
   const [files, setFiles] = useState({});
-
   const [appliedJobs, setAppliedJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [profileComplete, setProfileComplete] = useState(false);
@@ -42,21 +36,19 @@ function Jobs() {
       let jobRes;
       try {
         jobRes = await api.get("/jobs/filter/");
-      } catch (err) {
+      } catch {
         jobRes = await api.get("/jobs/");
       }
 
       setJobs(jobRes.data || []);
-
     } catch (err) {
-      console.error("Error:", err);
+      console.error(err);
       setProfileComplete(false);
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ UPDATED APPLY FUNCTION
   const applyJob = async (jobId) => {
     const file = files[jobId];
 
@@ -77,28 +69,34 @@ function Jobs() {
 
       alert("Applied successfully ✅");
       setAppliedJobs((prev) => [...prev, jobId]);
-
     } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.message || "Already applied or error ❌");
+      alert(err.response?.data?.message || "Already applied ❌");
     }
   };
 
   return (
-    <div style={styles.container}>
-      <h2>Recommended Jobs 🎯</h2>
+    <div className="container py-4">
 
-      {loading && <p>Loading...</p>}
+      <h2 className="mb-4 text-center fw-bold">
+        🎯 Recommended Jobs
+      </h2>
+
+      {loading && (
+        <div className="text-center">
+          <div className="spinner-border text-primary"></div>
+          <p className="mt-2">Loading jobs...</p>
+        </div>
+      )}
 
       {!loading && !profileComplete && (
-        <div style={styles.alertBox}>
-          <h3>⚠️ Profile Incomplete</h3>
+        <div className="alert alert-danger text-center shadow">
+          <h4>⚠️ Profile Incomplete</h4>
           <p>
             Complete your profile (skills, resume, experience) to see job recommendations.
           </p>
 
           <button
-            style={styles.completeBtn}
+            className="btn btn-danger mt-2"
             onClick={() => (window.location.href = "/dashboard/profile")}
           >
             Complete Profile
@@ -107,100 +105,80 @@ function Jobs() {
       )}
 
       {!loading && profileComplete && (
-        <>
-          <div style={styles.grid}>
-            {jobs.length === 0 ? (
-              <p>No matching jobs found 🔍</p>
-            ) : (
-              jobs.map((job) => (
-                <div key={job.id} style={styles.card}>
-                  <h3>{job.title}</h3>
-                  <p><b>Company:</b> {job.company}</p>
-                  <p><b>Location:</b> {job.location}</p>
-                  <p>{job.description}</p>
+        <div className="row g-4">
 
-                  {/* ✅ FILE INPUT PER JOB */}
-                  <input
-                    type="file"
-                    onChange={(e) =>
-                      setFiles({
-                        ...files,
-                        [job.id]: e.target.files[0],
-                      })
-                    }
-                  />
+          {jobs.length === 0 ? (
+            <div className="col-12 text-center">
+              <p className="text-muted fs-5">No matching jobs found 🔍</p>
+            </div>
+          ) : (
+            jobs.map((job) => {
+              const isApplied = appliedJobs.includes(job.id);
 
-                  <button
-                    onClick={() => applyJob(job.id)}
-                    disabled={appliedJobs.includes(job.id)}
-                    style={
-                      appliedJobs.includes(job.id)
-                        ? styles.appliedBtn
-                        : styles.applyBtn
-                    }
-                  >
-                    {appliedJobs.includes(job.id)
-                      ? "Applied"
-                      : "Apply"}
-                  </button>
+              return (
+                <div className="col-md-4" key={job.id}>
+                  <div className="card h-100 shadow-sm border-0">
+
+                    <div className="card-body d-flex flex-column">
+
+                      <h5 className="card-title fw-bold">
+                        {job.title}
+                      </h5>
+
+                      <p className="mb-1">
+                        <b>🏢 Company:</b> {job.company}
+                      </p>
+
+                      <p className="mb-1">
+                        <b>📍 Location:</b> {job.location}
+                      </p>
+
+                      <p className="text-muted small">
+                        {job.description}
+                      </p>
+
+                      <hr />
+
+                      {/* FILE INPUT */}
+                      <div className="mb-2">
+                        <label className="form-label">
+                          Upload Resume
+                        </label>
+                        <input
+                          type="file"
+                          className="form-control"
+                          onChange={(e) =>
+                            setFiles({
+                              ...files,
+                              [job.id]: e.target.files[0],
+                            })
+                          }
+                        />
+                      </div>
+
+                      {/* APPLY BUTTON */}
+                      <button
+                        className={`btn mt-auto ${
+                          isApplied ? "btn-secondary" : "btn-success"
+                        }`}
+                        onClick={() => applyJob(job.id)}
+                        disabled={isApplied}
+                      >
+                        {isApplied ? "✔ Applied" : "Apply Now"}
+                      </button>
+
+                    </div>
+
+                  </div>
                 </div>
-              ))
-            )}
-          </div>
-        </>
+              );
+            })
+          )}
+
+        </div>
       )}
     </div>
   );
 }
-
-// 🎨 STYLES (UNCHANGED)
-const styles = {
-  container: {
-    padding: "20px",
-  },
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
-    gap: "20px",
-  },
-  card: {
-    padding: "15px",
-    border: "1px solid #ccc",
-    borderRadius: "10px",
-    boxShadow: "2px 2px 10px rgba(0,0,0,0.1)",
-  },
-  applyBtn: {
-    marginTop: "10px",
-    padding: "8px",
-    backgroundColor: "green",
-    color: "white",
-    border: "none",
-    cursor: "pointer",
-  },
-  appliedBtn: {
-    marginTop: "10px",
-    padding: "8px",
-    backgroundColor: "gray",
-    color: "white",
-    border: "none",
-  },
-  alertBox: {
-    padding: "25px",
-    border: "2px solid #ff4d4f",
-    borderRadius: "10px",
-    backgroundColor: "#fff1f0",
-    textAlign: "center",
-    marginTop: "20px",
-  },
-  completeBtn: {
-    marginTop: "15px",
-    padding: "10px 15px",
-    backgroundColor: "#ff4d4f",
-    color: "white",
-    border: "none",
-    borderRadius: "5px",
-    cursor: "pointer",
-  },
-};
 
 export default Jobs;

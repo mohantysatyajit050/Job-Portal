@@ -10,6 +10,9 @@ function Login() {
     password: "",
   });
 
+  const [message, setMessage] = useState(null); // ✅ NEW
+  const [error, setError] = useState(null);     // ✅ NEW
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -23,7 +26,7 @@ function Login() {
       const { token, role, username } = res.data;
 
       if (!token || !role) {
-        alert("Invalid response from server");
+        setError("Invalid response from server");
         return;
       }
 
@@ -32,23 +35,27 @@ function Login() {
       localStorage.setItem("role", role);
       localStorage.setItem("username", username);
 
-      alert("Login successful");
+      // ✅ Flash success message
+      setMessage("Login successful!");
+      setError(null);
 
-      // ✅ Redirect based on role
-      if (role === "employer") {
-        navigate("/dashboard/employer");
-      } else if (role === "jobseeker") {
-        navigate("/dashboard/home");
-      } else {
-        navigate("/");
-      }
+      // ✅ Redirect after short delay (so user can see message)
+      setTimeout(() => {
+        if (role === "employer") {
+          navigate("/dashboard/employer");
+        } else if (role === "jobseeker") {
+          navigate("/dashboard/home");
+        } else {
+          navigate("/");
+        }
+      }, 1000);
 
     } catch (err) {
-      if (err.response && err.response.data) {
-        alert(err.response.data.error || "Login failed");
-      } else {
-        alert("Server error. Please try again.");
-      }
+      const errorMsg =
+        err.response?.data?.error || "Server error. Please try again.";
+
+      setError(errorMsg);
+      setMessage(null);
     }
   };
 
@@ -58,8 +65,22 @@ function Login() {
       style={{ minHeight: "90vh" }}
     >
       <div className="card shadow p-4" style={{ width: "100%", maxWidth: "400px" }}>
-        
+
         <h3 className="text-center mb-4 fw-bold">Login</h3>
+
+        {/* ✅ SUCCESS MESSAGE */}
+        {message && (
+          <div className="alert alert-success text-center">
+            {message}
+          </div>
+        )}
+
+        {/* ❌ ERROR MESSAGE */}
+        {error && (
+          <div className="alert alert-danger text-center">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
 
