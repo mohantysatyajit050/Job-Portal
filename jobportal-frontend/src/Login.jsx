@@ -10,8 +10,8 @@ function Login() {
     password: "",
   });
 
-  const [message, setMessage] = useState(null); // ✅ NEW
-  const [error, setError] = useState(null);     // ✅ NEW
+  const [message, setMessage] = useState(null);
+  const [error, setError] = useState(null);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -35,20 +35,19 @@ function Login() {
       localStorage.setItem("role", role);
       localStorage.setItem("username", username);
 
-      // ✅ Flash success message
       setMessage("Login successful!");
       setError(null);
 
-      // ✅ Redirect after short delay (so user can see message)
+      // ✅ ROLE-BASED REDIRECT (FIXED)
       setTimeout(() => {
         if (role === "employer") {
-          navigate("/dashboard/employer");
+          navigate("/employer");   // ✅ FIXED
         } else if (role === "jobseeker") {
-          navigate("/dashboard/home");
+          navigate("/dashboard/home"); // jobseeker dashboard
         } else {
           navigate("/");
         }
-      }, 1000);
+      }, 800);
 
     } catch (err) {
       const errorMsg =
@@ -68,14 +67,12 @@ function Login() {
 
         <h3 className="text-center mb-4 fw-bold">Login</h3>
 
-        {/* ✅ SUCCESS MESSAGE */}
         {message && (
           <div className="alert alert-success text-center">
             {message}
           </div>
         )}
 
-        {/* ❌ ERROR MESSAGE */}
         {error && (
           <div className="alert alert-danger text-center">
             {error}
@@ -84,7 +81,6 @@ function Login() {
 
         <form onSubmit={handleSubmit}>
 
-          {/* Username */}
           <div className="mb-3">
             <label className="form-label">Username</label>
             <input
@@ -97,7 +93,6 @@ function Login() {
             />
           </div>
 
-          {/* Password */}
           <div className="mb-3">
             <label className="form-label">Password</label>
             <input
@@ -110,17 +105,14 @@ function Login() {
             />
           </div>
 
-          {/* Button */}
           <button type="submit" className="btn btn-primary w-100">
             Login
           </button>
 
         </form>
 
-        {/* Divider */}
         <div className="text-center my-3 text-muted">OR</div>
 
-        {/* Register link */}
         <p className="text-center mb-0">
           Don't have an account?{" "}
           <Link to="/register" className="text-decoration-none">

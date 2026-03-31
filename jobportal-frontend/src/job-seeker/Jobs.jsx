@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../api/api";
 
-function Jobs() {
+function Jobs({ mode = "recommended" }) {
   const [jobs, setJobs] = useState([]);
   const [files, setFiles] = useState({});
   const [appliedJobs, setAppliedJobs] = useState([]);
@@ -9,46 +9,53 @@ function Jobs() {
   const [profileComplete, setProfileComplete] = useState(false);
 
   useEffect(() => {
-    checkProfileAndFetchJobs();
-  }, []);
+    fetchJobs();
+  }, [mode]);
 
-  const checkProfileAndFetchJobs = async () => {
+  const fetchJobs = async () => {
     try {
       setLoading(true);
 
-      const profileRes = await api.get("/users/profile/");
-      const profile = profileRes.data;
-
-      const hasSkills =
-        Array.isArray(profile.skills) && profile.skills.length > 0;
-
-      const isComplete =
-        profile.is_complete === true || profile.is_complete === "true";
-
-      if (!hasSkills || !isComplete) {
-        setProfileComplete(false);
-        setJobs([]);
-        return;
-      }
-
-      setProfileComplete(true);
-
       let jobRes;
-      try {
-        jobRes = await api.get("/jobs/filter/");
-      } catch {
+
+      if (mode === "trending") {
         jobRes = await api.get("/jobs/");
+        setProfileComplete(true);
+      } else {
+        const profileRes = await api.get("/users/profile/");
+        const profile = profileRes.data;
+
+        const hasSkills =
+          (Array.isArray(profile.skills) && profile.skills.length > 0) ||
+          (typeof profile.skills === "string" && profile.skills.trim() !== "");
+
+        const isComplete = profile.is_complete === true;
+
+        if (!hasSkills || !isComplete) {
+          setProfileComplete(false);
+          setJobs([]);
+          return;
+        }
+
+        setProfileComplete(true);
+
+        try {
+          jobRes = await api.get("/jobs/filter/");
+        } catch {
+          jobRes = await api.get("/jobs/");
+        }
       }
 
       setJobs(jobRes.data || []);
     } catch (err) {
-      console.error(err);
+      console.error("Fetch Jobs Error:", err);
       setProfileComplete(false);
     } finally {
       setLoading(false);
     }
   };
 
+  // ✅ FIXED APPLY FUNCTION
   const applyJob = async (jobId) => {
     const file = files[jobId];
 
@@ -61,24 +68,31 @@ function Jobs() {
     formData.append("resume", file);
 
     try {
-      await api.post(`/jobs/apply/${jobId}/`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const res = await api.post(`/jobs/apply/${jobId}/`, formData);
+
+      console.log("SUCCESS:", res.data);
 
       alert("Applied successfully ✅");
+
       setAppliedJobs((prev) => [...prev, jobId]);
     } catch (err) {
-      alert(err.response?.data?.message || "Already applied ❌");
+      // 🔥 FULL DEBUG (VERY IMPORTANT)
+      console.log("FULL ERROR:", err);
+      console.log("ERROR RESPONSE:", err.response);
+      console.log("ERROR DATA:", err.response?.data);
+
+      alert(
+        err.response?.data?.detail ||
+        err.response?.data?.message ||
+        "Application failed ❌"
+      );
     }
   };
 
   return (
     <div className="container py-4">
-
       <h2 className="mb-4 text-center fw-bold">
-        🎯 Recommended Jobs
+        {mode === "trending" ? "🔥 Trending Jobs" : "🎯 Recommended Jobs"}
       </h2>
 
       {loading && (
@@ -88,13 +102,12 @@ function Jobs() {
         </div>
       )}
 
-      {!loading && !profileComplete && (
+      {!loading && mode === "recommended" && !profileComplete && (
         <div className="alert alert-danger text-center shadow">
           <h4>⚠️ Profile Incomplete</h4>
           <p>
             Complete your profile (skills, resume, experience) to see job recommendations.
           </p>
-
           <button
             className="btn btn-danger mt-2"
             onClick={() => (window.location.href = "/dashboard/profile")}
@@ -104,77 +117,59 @@ function Jobs() {
         </div>
       )}
 
-      {!loading && profileComplete && (
+      {!loading && jobs.length === 0 && profileComplete && (
+        <p className="text-center text-muted fs-5">
+          No jobs found 🔍
+        </p>
+      )}
+
+      {!loading && jobs.length > 0 && (
         <div className="row g-4">
+          {jobs.map((job) => {
+            const isApplied = appliedJobs.includes(job.id);
 
-          {jobs.length === 0 ? (
-            <div className="col-12 text-center">
-              <p className="text-muted fs-5">No matching jobs found 🔍</p>
-            </div>
-          ) : (
-            jobs.map((job) => {
-              const isApplied = appliedJobs.includes(job.id);
+            return (
+              <div className="col-md-4" key={job.id}>
+                <div className="card h-100 shadow-sm border-0">
+                  <div className="card-body d-flex flex-column">
+                    <h5 className="card-title fw-bold">{job.title}</h5>
 
-              return (
-                <div className="col-md-4" key={job.id}>
-                  <div className="card h-100 shadow-sm border-0">
+                    <p><b>🏢 Company:</b> {job.company}</p>
+                    <p><b>📍 Location:</b> {job.location}</p>
 
-                    <div className="card-body d-flex flex-column">
+                    <p className="text-muted small">
+                      {job.description}
+                    </p>
 
-                      <h5 className="card-title fw-bold">
-                        {job.title}
-                      </h5>
+                    <hr />
 
-                      <p className="mb-1">
-                        <b>🏢 Company:</b> {job.company}
-                      </p>
+                    {mode === "recommended" && (
+                      <input
+                        type="file"
+                        className="form-control mb-2"
+                        onChange={(e) =>
+                          setFiles({
+                            ...files,
+                            [job.id]: e.target.files[0],
+                          })
+                        }
+                      />
+                    )}
 
-                      <p className="mb-1">
-                        <b>📍 Location:</b> {job.location}
-                      </p>
-
-                      <p className="text-muted small">
-                        {job.description}
-                      </p>
-
-                      <hr />
-
-                      {/* FILE INPUT */}
-                      <div className="mb-2">
-                        <label className="form-label">
-                          Upload Resume
-                        </label>
-                        <input
-                          type="file"
-                          className="form-control"
-                          onChange={(e) =>
-                            setFiles({
-                              ...files,
-                              [job.id]: e.target.files[0],
-                            })
-                          }
-                        />
-                      </div>
-
-                      {/* APPLY BUTTON */}
-                      <button
-                        className={`btn mt-auto ${
-                          isApplied ? "btn-secondary" : "btn-success"
-                        }`}
-                        onClick={() => applyJob(job.id)}
-                        disabled={isApplied}
-                      >
-                        {isApplied ? "✔ Applied" : "Apply Now"}
-                      </button>
-
-                    </div>
-
+                    <button
+                      className={`btn mt-auto ${
+                        isApplied ? "btn-secondary" : "btn-success"
+                      }`}
+                      onClick={() => applyJob(job.id)}
+                      disabled={isApplied}
+                    >
+                      {isApplied ? "✔ Applied" : "Apply Now"}
+                    </button>
                   </div>
                 </div>
-              );
-            })
-          )}
-
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

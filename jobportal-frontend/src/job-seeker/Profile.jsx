@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 
 const SKILL_CATEGORIES = [
@@ -40,9 +39,7 @@ const COURSE_OPTIONS = [
   "AI & ML", "Mobile App Dev", "DevOps", "UI/UX", "Cybersecurity",
 ];
 
-function Profile() {
-  const navigate = useNavigate();
-
+function Profile({ onGoToJobs }) {
   const [step, setStep] = useState(1);
   const [resume, setResume] = useState(null);
   const [selectedSkills, setSelectedSkills] = useState([]);
@@ -77,7 +74,12 @@ function Profile() {
     try {
       setLoading(true);
       await api.post("/users/update-profile/", formData);
-      navigate("/dashboard/jobs");
+
+      // ✅ FIX: switch tab instead of navigate
+      if (onGoToJobs) {
+        onGoToJobs();
+      }
+
     } catch {
       alert("Error updating profile ❌");
     } finally {
@@ -88,13 +90,11 @@ function Profile() {
   return (
     <div className="container py-4">
 
-      {/* HEADER */}
       <div className="text-center mb-4">
         <h2 className="fw-bold">⚡ Build Your Profile</h2>
         <p className="text-muted">Get matched with the best jobs</p>
       </div>
 
-      {/* PROGRESS BAR */}
       <div className="progress mb-4" style={{ height: "8px" }}>
         <div
           className="progress-bar bg-success"
@@ -102,7 +102,6 @@ function Profile() {
         ></div>
       </div>
 
-      {/* STEP INDICATOR */}
       <div className="d-flex justify-content-between mb-4 text-center">
         <div className={`fw-bold ${step === 1 ? "text-primary" : ""}`}>
           📄 Resume
@@ -115,10 +114,8 @@ function Profile() {
         </div>
       </div>
 
-      {/* CARD */}
       <div className="card shadow-lg border-0 p-4">
 
-        {/* STEP 1 */}
         {step === 1 && (
           <>
             <h5 className="mb-3">Upload Resume</h5>
@@ -153,7 +150,6 @@ function Profile() {
           </>
         )}
 
-        {/* STEP 2 */}
         {step === 2 && (
           <>
             <h5 className="mb-3">Select Skills</h5>
@@ -195,7 +191,6 @@ function Profile() {
           </>
         )}
 
-        {/* STEP 3 */}
         {step === 3 && (
           <>
             <h5 className="mb-3">Courses</h5>

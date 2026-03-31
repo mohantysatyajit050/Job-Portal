@@ -1,21 +1,32 @@
 from django.urls import path
 from .views import (
-    JobListCreateView,
+    JobListView,
+    JobCreateView,
     JobDetailView,
     ApplyJobView,
+    MyJobsView,
     FilteredJobListView,
+    MyApplicationsView,
+    JobApplicantsView,
+    UpdateApplicationStatusView,
 )
 
 urlpatterns = [
-    # 🔹 Get jobs based on profile (MATCHED JOBS)
-    path('filter/', FilteredJobListView.as_view(), name='filtered-jobs'),
+    path('', JobListView.as_view(), name='job-list'),
 
-    # 🔹 Get all jobs + Post job
-    path('', JobListCreateView.as_view(), name='job-list-create'),
+    path('create/', JobCreateView.as_view(), name='job-create'),
 
-    # 🔹 Apply to a specific job (VERY IMPORTANT FIX)
+    path('my-jobs/', MyJobsView.as_view(), name='my-jobs'),
+
     path('apply/<int:job_id>/', ApplyJobView.as_view(), name='apply-job'),
 
-    # 🔹 Get single job / update / delete
     path('<int:pk>/', JobDetailView.as_view(), name='job-detail'),
+
+    path('filter/', FilteredJobListView.as_view(), name='filtered-jobs'),
+
+    path('my-applications/', MyApplicationsView.as_view(), name='my-applications'),
+
+    path('<int:job_id>/applicants/', JobApplicantsView.as_view(), name='job-applicants'),
+
+    path('applications/<int:pk>/status/', UpdateApplicationStatusView.as_view(), name='update-status'),
 ]

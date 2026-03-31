@@ -12,10 +12,13 @@ import ErrorPage from "./components/Error";
 
 import Login from "./Login";
 import Register from "./register";
-import Jobs from "./job-seeker/Jobs";
-import Profile from "./job-seeker/Profile";
+
+
 import Home from "./Home";
+
 import DashboardHome from "./job-seeker/DashboardHome";
+
+// 🔥 EMPLOYER IMPORTS
 import EmployerDashboard from "./employer/EmployerDashboard";
 
 // 🔐 Protected Route
@@ -65,24 +68,26 @@ function App() {
           <Route path="/register" element={<Register />} />
         </Route>
 
-        {/* 🔐 EMPLOYER */}
+        {/* 🔐 EMPLOYER ROUTES */}
         <Route element={<ProtectedRoute allowedRole="employer" />}>
           <Route element={<DashboardLayout />}>
-            <Route path="/dashboard/employer" element={<EmployerDashboard />} />
+
+            {/* Employer Dashboard */}
+            <Route path="/employer" element={<EmployerDashboard />} />
+
+            
+
           </Route>
         </Route>
 
-        {/* 🔐 JOBSEEKER */}
+        {/* 🔐 JOBSEEKER ROUTES */}
         <Route element={<ProtectedRoute allowedRole="jobseeker" />}>
           <Route element={<DashboardLayout />}>
-            <Route path="/dashboard" element={<Navigate to="/dashboard/home" />} />
-            <Route path="/dashboard/home" element={<DashboardHome />} />
-            <Route path="/dashboard/jobs" element={<Jobs />} />
-            <Route path="/dashboard/profile" element={<Profile />} />
+            <Route path="/dashboard/*" element={<DashboardHome />} />
           </Route>
         </Route>
 
-        {/* ❌ 404 PAGE */}
+        {/* ❌ 404 */}
         <Route path="*" element={<ErrorPage />} />
 
       </Routes>

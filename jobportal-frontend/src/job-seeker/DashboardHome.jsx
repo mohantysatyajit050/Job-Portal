@@ -1,11 +1,11 @@
 import { useState } from "react";
 import Jobs from "./Jobs";
 import Profile from "./Profile";
+import Activity from "./Activity";
 
 function DashboardHome() {
   const [tab, setTab] = useState("dashboard");
 
-  // ✅ Close sidebar function (important for mobile)
   const closeSidebar = () => {
     const offcanvasEl = document.getElementById("sidebar");
     const bsOffcanvas =
@@ -24,13 +24,32 @@ function DashboardHome() {
   const renderContent = () => {
     switch (tab) {
       case "dashboard":
-        return <h3>🏠 Dashboard Content</h3>;
+        return (
+          <>
+            <h3 className="mb-3">🔥 Trending Jobs</h3>
+            <Jobs mode="trending" />
+          </>
+        );
+
       case "jobs":
-        return <Jobs />;
+        return (
+          <>
+            <h3 className="mb-3">🎯 Recommended Jobs</h3>
+            <Jobs mode="recommended" />
+          </>
+        );
+
       case "profile":
-        return <Profile />;
+        return (
+          <Profile
+            // ✅ THIS is the fix
+            onGoToJobs={() => setTab("jobs")}
+          />
+        );
+
       case "activity":
-        return <h3>📊 Activity Content</h3>;
+        return <Activity />;
+
       default:
         return null;
     }
@@ -40,7 +59,6 @@ function DashboardHome() {
     <div className="container-fluid">
       <div className="row">
 
-        {/* 🔹 MOBILE TOP BAR (HAMBURGER) */}
         <nav className="navbar navbar-dark bg-dark d-md-none w-100">
           <div className="container-fluid">
             <button
@@ -55,7 +73,6 @@ function DashboardHome() {
           </div>
         </nav>
 
-        {/* 🔹 SIDEBAR */}
         <div
           className="offcanvas-md offcanvas-start bg-dark text-white col-md-2 p-3"
           id="sidebar"
@@ -64,43 +81,38 @@ function DashboardHome() {
           <h5 className="mb-4">JobSeeker</h5>
 
           <button
-            className={`btn btn-dark w-100 text-start mb-2 ${
-              tab === "dashboard" && "bg-secondary"
-            }`}
+            className={`btn btn-dark w-100 text-start mb-2 ${tab === "dashboard" && "bg-secondary"
+              }`}
             onClick={() => handleTabChange("dashboard")}
           >
             🏠 Dashboard
           </button>
 
           <button
-            className={`btn btn-dark w-100 text-start mb-2 ${
-              tab === "jobs" && "bg-secondary"
-            }`}
+            className={`btn btn-dark w-100 text-start mb-2 ${tab === "jobs" && "bg-secondary"
+              }`}
             onClick={() => handleTabChange("jobs")}
           >
             📋 Jobs
           </button>
 
           <button
-            className={`btn btn-dark w-100 text-start mb-2 ${
-              tab === "profile" && "bg-secondary"
-            }`}
+            className={`btn btn-dark w-100 text-start mb-2 ${tab === "profile" && "bg-secondary"
+              }`}
             onClick={() => handleTabChange("profile")}
           >
             👤 Profile
           </button>
 
           <button
-            className={`btn btn-dark w-100 text-start mb-2 ${
-              tab === "activity" && "bg-secondary"
-            }`}
+            className={`btn btn-dark w-100 text-start mb-2 ${tab === "activity" && "bg-secondary"
+              }`}
             onClick={() => handleTabChange("activity")}
           >
             📊 Activity
           </button>
         </div>
 
-        {/* 🔹 CONTENT AREA */}
         <div className="col-12 col-md-10 p-4">
           {renderContent()}
         </div>

@@ -1,32 +1,40 @@
 import { useState } from "react";
+import DashboardHome from "./DashboardHome";
+import PostJob from "./PostJob";
+import Applicants from "./Applicants";
 
 function EmployerDashboard() {
   const [tab, setTab] = useState("dashboard");
+  const [selectedJobId, setSelectedJobId] = useState(null);
 
-  // ✅ Proper sidebar close (safe)
   const closeSidebar = () => {
     const sidebar = document.getElementById("employerSidebar");
-
     if (sidebar) {
-      sidebar.classList.remove("show"); // force close
+      sidebar.classList.remove("show");
     }
   };
 
   const handleTabChange = (tabName) => {
     setTab(tabName);
-    closeSidebar(); // ✅ close after click
+    closeSidebar();
   };
 
   const renderContent = () => {
     switch (tab) {
       case "dashboard":
-        return <h3>🏢 Employer Dashboard</h3>;
+        return (
+          <DashboardHome
+            setSelectedJobId={setSelectedJobId}
+            setTab={setTab}
+          />
+        );
+
       case "post":
-        return <h3>➕ Post Job</h3>;
-      case "jobs":
-        return <h3>📋 My Jobs</h3>;
+        return <PostJob />;
+
       case "applicants":
-        return <h3>👀 Applicants</h3>;
+        return <Applicants jobId={selectedJobId} />;
+
       default:
         return null;
     }
@@ -36,22 +44,7 @@ function EmployerDashboard() {
     <div className="container-fluid">
       <div className="row">
 
-        {/* 🔹 MOBILE TOP BAR */}
-        <nav className="navbar navbar-dark bg-dark d-md-none w-100">
-          <div className="container-fluid">
-            <button
-              className="navbar-toggler"
-              type="button"
-              data-bs-toggle="offcanvas"
-              data-bs-target="#employerSidebar"
-            >
-              ☰
-            </button>
-            <span className="navbar-brand">Employer</span>
-          </div>
-        </nav>
-
-        {/* 🔹 SIDEBAR */}
+        {/* SIDEBAR */}
         <div
           className="offcanvas-md offcanvas-start bg-dark text-white col-md-2 p-3"
           id="employerSidebar"
@@ -79,15 +72,6 @@ function EmployerDashboard() {
 
           <button
             className={`btn btn-dark w-100 text-start mb-2 ${
-              tab === "jobs" && "bg-secondary"
-            }`}
-            onClick={() => handleTabChange("jobs")}
-          >
-            📋 My Jobs
-          </button>
-
-          <button
-            className={`btn btn-dark w-100 text-start mb-2 ${
               tab === "applicants" && "bg-secondary"
             }`}
             onClick={() => handleTabChange("applicants")}
@@ -96,7 +80,7 @@ function EmployerDashboard() {
           </button>
         </div>
 
-        {/* 🔹 CONTENT */}
+        {/* CONTENT */}
         <div className="col-12 col-md-10 p-4">
           {renderContent()}
         </div>
