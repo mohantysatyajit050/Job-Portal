@@ -1,0 +1,16 @@
+/* 🔥 Job Card Hover Effect */
+.job-card {
+  transition: all 0.3s ease;
+}
+
+.job-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Better spacing on mobile */
+@media (max-width: 768px) {
+  .job-card {
+    padding: 10px;
+  }
+}

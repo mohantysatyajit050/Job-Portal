@@ -15,6 +15,7 @@ function PostJob() {
 
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setForm({
@@ -25,101 +26,125 @@ function PostJob() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
-      // ✅ IMPORTANT: correct endpoint
       const res = await api.post("/jobs/create/", form);
-
-      console.log("Job Created:", res.data);
 
       setMessage("Job posted successfully ✅");
       setError(null);
 
-      // Optional redirect to employer dashboard (tab system)
       setTimeout(() => {
         navigate("/employer");
-      }, 1000);
-
+      }, 1200);
     } catch (err) {
-      console.error("ERROR:", err.response?.data);
-
-      // Show real backend error
       setError(
         JSON.stringify(err.response?.data) || "Failed to post job ❌"
       );
       setMessage(null);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div style={{ maxWidth: "500px", margin: "auto", padding: "20px" }}>
-      <h2>➕ Post a Job</h2>
+    <div className="container py-4">
+      <div className="row justify-content-center">
+        <div className="col-12 col-md-8 col-lg-6">
 
-      {message && <p style={{ color: "green" }}>{message}</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
+          <div className="card shadow-lg border-0 rounded-4 p-4">
+            <h3 className="mb-4 text-center fw-bold">
+              ➕ Post a Job
+            </h3>
 
-      <form onSubmit={handleSubmit}>
-        {/* Job Title */}
-        <div>
-          <label>Job Title</label>
-          <input
-            type="text"
-            name="title"
-            value={form.title}
-            onChange={handleChange}
-            required
-          />
+            {/* Alerts */}
+            {message && (
+              <div className="alert alert-success">{message}</div>
+            )}
+            {error && (
+              <div className="alert alert-danger">{error}</div>
+            )}
+
+            <form onSubmit={handleSubmit}>
+
+              {/* Job Title */}
+              <div className="mb-3">
+                <label className="form-label">Job Title</label>
+                <input
+                  type="text"
+                  className="form-control rounded-3"
+                  name="title"
+                  value={form.title}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              {/* Description */}
+              <div className="mb-3">
+                <label className="form-label">Description</label>
+                <textarea
+                  className="form-control rounded-3"
+                  rows="4"
+                  name="description"
+                  value={form.description}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              {/* Skills */}
+              <div className="mb-3">
+                <label className="form-label">
+                  Skills Required
+                </label>
+                <input
+                  type="text"
+                  className="form-control rounded-3"
+                  name="skills_required"
+                  value={form.skills_required}
+                  onChange={handleChange}
+                  placeholder="React, Django, Python"
+                />
+              </div>
+
+              {/* Location */}
+              <div className="mb-3">
+                <label className="form-label">Location</label>
+                <input
+                  type="text"
+                  className="form-control rounded-3"
+                  name="location"
+                  value={form.location}
+                  onChange={handleChange}
+                />
+              </div>
+
+              {/* Salary */}
+              <div className="mb-3">
+                <label className="form-label">Salary</label>
+                <input
+                  type="number"
+                  className="form-control rounded-3"
+                  name="salary"
+                  value={form.salary}
+                  onChange={handleChange}
+                />
+              </div>
+
+              {/* Submit */}
+              <button
+                type="submit"
+                className="btn btn-primary w-100 rounded-3"
+                disabled={loading}
+              >
+                {loading ? "Posting..." : "🚀 Post Job"}
+              </button>
+            </form>
+          </div>
+
         </div>
-
-        {/* Description */}
-        <div>
-          <label>Description</label>
-          <textarea
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        {/* Skills */}
-        <div>
-          <label>Skills Required (comma separated)</label>
-          <input
-            type="text"
-            name="skills_required"
-            value={form.skills_required}
-            onChange={handleChange}
-            placeholder="React, Django, Python"
-          />
-        </div>
-
-        {/* Location */}
-        <div>
-          <label>Location</label>
-          <input
-            type="text"
-            name="location"
-            value={form.location}
-            onChange={handleChange}
-          />
-        </div>
-
-        {/* Salary */}
-        <div>
-          <label>Salary</label>
-          <input
-            type="number"
-            name="salary"
-            value={form.salary}
-            onChange={handleChange}
-          />
-        </div>
-
-        <button type="submit" style={{ marginTop: "10px" }}>
-          Post Job
-        </button>
-      </form>
+      </div>
     </div>
   );
 }
