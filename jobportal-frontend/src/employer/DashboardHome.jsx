@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../api/api";
 
-function DashboardHome({ changeTab }) {
+function DashboardHome({ setSelectedJobId, setTab }) {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -21,59 +21,42 @@ function DashboardHome({ changeTab }) {
   }, []);
 
   return (
-    <div className="container-fluid">
-      <h2 className="mb-4 fw-bold">📊 My Posted Jobs</h2>
+    <div>
+      <h2>📊 My Posted Jobs</h2>
 
-      {/* 🔹 Loading */}
       {loading ? (
-        <div className="text-center mt-5">
-          <div className="spinner-border text-primary"></div>
-          <p className="mt-2">Loading jobs...</p>
-        </div>
+        <p>Loading...</p>
       ) : jobs.length === 0 ? (
-        /* 🔹 Empty State */
-        <div className="text-center mt-5">
-          <h5 className="text-muted">No jobs posted yet</h5>
-          <p className="text-muted">Start by posting a new job 🚀</p>
-        </div>
+        <p>No jobs posted yet.</p>
       ) : (
-        /* 🔥 JOB CARDS */
-        <div className="row g-4">
-          {jobs.map((job) => (
-            <div key={job.id} className="col-12 col-md-6 col-lg-4">
-              <div className="card shadow-sm h-100 border-0 rounded-4 job-card">
-                <div className="card-body d-flex flex-column">
+        jobs.map((job) => (
+          <div
+            key={job.id}
+            style={{
+              border: "1px solid #ccc",
+              padding: "10px",
+              margin: "10px 0",
+            }}
+          >
+            <h4>{job.title}</h4>
+            <p>{job.description}</p>
+            <p>
+              <strong>Skills:</strong> {job.skills_required}
+            </p>
 
-                  {/* Title */}
-                  <h5 className="card-title fw-bold mb-2">
-                    {job.title}
-                  </h5>
-
-                  {/* Description */}
-                  <p className="text-muted small flex-grow-1">
-                    {job.description?.slice(0, 100)}...
-                  </p>
-
-                  {/* Skills */}
-                  <p className="mb-2">
-                    <strong>Skills:</strong>{" "}
-                    <span className="text-primary">
-                      {job.skills_required}
-                    </span>
-                  </p>
-
-                  {/* Button */}
-                  <button
-                    className="btn btn-primary mt-auto w-100 rounded-3"
-                    onClick={() => changeTab("applicants", job.id)}
-                  >
-                    👀 View Applicants
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+            {/* 🔥 ADD THIS BUTTON */}
+            <button
+              className="btn btn-primary mt-2"
+              onClick={() => {
+                console.log("Selected Job ID:", job.id); // debug
+                setSelectedJobId(job.id);  // ✅ PASS JOB ID
+                setTab("applicants");      // ✅ SWITCH TAB
+              }}
+            >
+              👀 View Applicants
+            </button>
+          </div>
+        ))
       )}
     </div>
   );
