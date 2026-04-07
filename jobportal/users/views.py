@@ -129,3 +129,13 @@ def select_role(request):
     profile.save()
 
     return Response({"message": "Role updated successfully"})
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def logout(request):
+    try:
+        # Delete the token to logout
+        request.user.auth_token.delete()
+        return Response({"message": "Logout successful"}, status=status.HTTP_200_OK)
+    except:
+        return Response({"error": "Error during logout"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
