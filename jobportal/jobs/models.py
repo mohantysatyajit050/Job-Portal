@@ -9,7 +9,7 @@ class Job(models.Model):
     title = models.CharField(max_length=200)
     company = models.CharField(max_length=255, blank=True, null=True)
     location = models.CharField(max_length=200)
-    salary = models.IntegerField()
+    salary = models.CharField(max_length=100, blank=True, null=True)
     description = models.TextField()
 
     # Skills required for matching

@@ -15,32 +15,28 @@ class FilteredJobListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        user = request.user
-        profile = getattr(user, "profile", None)
+        profile = getattr(request.user, "profile", None)
 
         if not profile or not profile.skills:
             return Response([])
 
-        if isinstance(profile.skills, list):
-            user_skills = [s.strip().lower() for s in profile.skills if s]
-        else:
-            user_skills = [s.strip().lower() for s in profile.skills.split(",") if s]
+        user_skills = [s.lower() for s in profile.skills]
 
         jobs = Job.objects.all()
         matched_jobs = []
 
         for job in jobs:
-            if isinstance(job.skills_required, list):
-                job_skills = [s.strip().lower() for s in job.skills_required if s]
-            else:
-                job_skills = [s.strip().lower() for s in job.skills_required.split(",") if s]
+            job_skills = [
+                s.strip().lower()
+                for s in job.skills_required.split(",")
+                if s.strip()
+            ]
 
             if any(skill in job_skills for skill in user_skills):
                 matched_jobs.append(job)
 
         serializer = JobSerializer(matched_jobs, many=True)
         return Response(serializer.data)
-
 
 # 🔹 Employer - My Jobs
 class MyJobsView(APIView):
@@ -66,11 +62,18 @@ class JobCreateView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        if self.request.user.profile.role != "employer":
-            raise PermissionDenied("Only employers can post jobs")
-
+        # ✅ Safely get profile
         profile = getattr(self.request.user, "profile", None)
 
+        # ❌ If profile missing OR not employer
+        if not profile or profile.role != "employer":
+            raise PermissionDenied("Only employers can post jobs")
+
+        # 🔐 Admin approval check (IMPORTANT)
+        if not profile.is_approved:
+            raise PermissionDenied("Your account is not approved yet")
+
+        # ✅ Save job
         serializer.save(
             employer=self.request.user,
             company=getattr(profile, "company", self.request.user.username)
@@ -95,28 +98,47 @@ class JobDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 # 🔹 Apply Job (Job Seeker Only)
-class ApplyJobView(generics.CreateAPIView):
-    queryset = Application.objects.all()
-    serializer_class = ApplicationSerializer
+class ApplyJobView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def perform_create(self, serializer):
-        if self.request.user.profile.role != "jobseeker":
+    def post(self, request, job_id):
+        profile = getattr(request.user, "profile", None)
+
+        # 🔐 Role check
+        if not profile or profile.role != "jobseeker":
             raise PermissionDenied("Only job seekers can apply")
 
-        job_id = self.kwargs.get("job_id")
+        # 🔐 Admin approval check
+        if not profile.is_approved:
+            return Response({"detail": "Account not approved yet"}, status=403)
+
         job = get_object_or_404(Job, id=job_id)
 
-        # Prevent duplicate applications
-        if Application.objects.filter(applicant=self.request.user, job=job).exists():
-            raise PermissionDenied("You already applied to this job")
+        # ❌ Prevent duplicate
+        if Application.objects.filter(applicant=request.user, job=job).exists():
+            return Response(
+                {"detail": "You already applied to this job"},
+                status=400
+            )
 
-        # ✅ Default status = pending
-        serializer.save(
-            applicant=self.request.user,
+        resume = request.FILES.get("resume")
+
+        # ❌ Resume required
+        if not resume:
+            return Response(
+                {"detail": "Resume is required"},
+                status=400
+            )
+
+        application = Application.objects.create(
+            applicant=request.user,
             job=job,
+            resume=resume,
             status="pending"
         )
+
+        serializer = ApplicationSerializer(application)
+        return Response(serializer.data, status=201)
 
 
 # 🔹 Job Seeker Activity Page API
@@ -165,4 +187,7 @@ class UpdateApplicationStatusView(APIView):
         application.status = status
         application.save()
 
-        return Response({"message": "Status updated"})
+        return Response({
+    "message": "Status updated",
+    "status": application.status
+})

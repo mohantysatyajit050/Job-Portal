@@ -1,3 +1,4 @@
+import React from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -13,29 +14,29 @@ import ErrorPage from "./components/Error";
 import Login from "./Login";
 import Register from "./register";
 
-
 import Home from "./Home";
-
 import DashboardHome from "./job-seeker/DashboardHome";
-
-// 🔥 EMPLOYER IMPORTS
 import EmployerDashboard from "./employer/EmployerDashboard";
 
-// 🔐 Protected Route
-function ProtectedRoute({ allowedRole }) {
+// ADMIN IMPORTS
+import AdminDashboard from "./admin/AdminDashboard";
+import Users from "./admin/Users";
+
+// Protected Route
+function ProtectedRoute({ allowedRoles }) {
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
 
   if (!token) return <Navigate to="/login" />;
 
-  if (allowedRole && role !== allowedRole) {
+  if (allowedRoles && !allowedRoles.includes(role)) {
     return <Navigate to="/login" />;
   }
 
   return <Outlet />;
 }
 
-// 🌐 PUBLIC LAYOUT
+// PUBLIC LAYOUT
 function PublicLayout() {
   return (
     <>
@@ -46,7 +47,7 @@ function PublicLayout() {
   );
 }
 
-// 🔥 DASHBOARD LAYOUT
+// DASHBOARD LAYOUT
 function DashboardLayout() {
   return (
     <>
@@ -61,33 +62,36 @@ function App() {
     <Router>
       <Routes>
 
-        {/* 🌐 PUBLIC ROUTES */}
+        {/* PUBLIC ROUTES */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
         </Route>
 
-        {/* 🔐 EMPLOYER ROUTES */}
-        <Route element={<ProtectedRoute allowedRole="employer" />}>
+        {/* ADMIN ROUTES */}
+        <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
           <Route element={<DashboardLayout />}>
-
-            {/* Employer Dashboard */}
-            <Route path="/employer" element={<EmployerDashboard />} />
-
-            
-
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/users" element={<Users />} />
           </Route>
         </Route>
 
-        {/* 🔐 JOBSEEKER ROUTES */}
-        <Route element={<ProtectedRoute allowedRole="jobseeker" />}>
+        {/* EMPLOYER ROUTES */}
+        <Route element={<ProtectedRoute allowedRoles={["employer"]} />}>
+          <Route element={<DashboardLayout />}>
+            <Route path="/employer" element={<EmployerDashboard />} />
+          </Route>
+        </Route>
+
+        {/* JOBSEEKER ROUTES */}
+        <Route element={<ProtectedRoute allowedRoles={["jobseeker"]} />}>
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard/*" element={<DashboardHome />} />
           </Route>
         </Route>
 
-        {/* ❌ 404 */}
+        {/* 404 */}
         <Route path="*" element={<ErrorPage />} />
 
       </Routes>
