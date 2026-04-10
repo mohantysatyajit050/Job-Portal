@@ -20,17 +20,12 @@ class Profile(models.Model):
         default='jobseeker'
     )
 
-    # 🔥 EXISTING FIELDS
     resume = models.FileField(upload_to='resumes/', null=True, blank=True)
     skills = models.JSONField(default=list, blank=True)
     courses = models.JSONField(default=list, blank=True)
-    experience = models.CharField(max_length=20, blank=True, default="")
+    experience = models.CharField(max_length=20, blank=True, default="")  # 🔥 NEW: e.g. "1–3 yrs"
 
-    # 🔥 NEW ADMIN CONTROL FIELDS
     is_complete = models.BooleanField(default=False)
-    is_approved = models.BooleanField(default=False)   # ✅ Admin approval
-    is_eligible = models.BooleanField(default=False)   # ✅ For filtering candidates
-    test_score = models.FloatField(null=True, blank=True)  # ✅ For future test system
 
     def save(self, *args, **kwargs):
         # Profile is complete when resume + at least 1 skill is present
@@ -38,7 +33,6 @@ class Profile(models.Model):
             self.is_complete = True
         else:
             self.is_complete = False
-
         super().save(*args, **kwargs)
 
     def __str__(self):

@@ -1,43 +1,48 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
 import Jobs from "./Jobs";
 import Profile from "./Profile";
 import Activity from "./Activity";
 
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = "http://127.0.0.1:8000"; // 🔧 Change if your backend URL differs
 
 function DashboardHome() {
   const [tab, setTab] = useState("dashboard");
-  const [isLoading, setIsLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
-  const [profileLoading, setProfileLoading] = useState(true);
+
+  // ✅ Real user state from backend
+  const [user, setUser] = useState({
+    name: "",
+    email: "",
+    role: "",
+    avatar: null,
+    skills: [],
+    is_complete: false,
+  });
+
+  // ✅ Real stats from backend (with fallback defaults)
   const [stats, setStats] = useState({
     applications: 0,
     interviews: 0,
     jobMatches: 0,
   });
-  const [user, setUser] = useState({
-    name: "",
-    email: "",
-    role: "jobseeker",
-    avatar: null,
-    skills: [],
-    is_complete: false,
-  });
+
   const [notifications, setNotifications] = useState([
-    { id: 1, text: "New job match: Senior Developer at TechCorp", time: "2 hours ago", read: false },
-    { id: 2, text: "Your profile was viewed by 3 recruiters", time: "5 hours ago", read: false },
-    { id: 3, text: "Application status update: In review", time: "1 day ago", read: true },
+    { id: 1, text: "New job match for Senior Developer", read: false, time: "2h ago" },
+    { id: 2, text: "Your profile was viewed by 5 companies", read: false, time: "5h ago" },
+    { id: 3, text: "Application status updated", read: true, time: "1d ago" },
   ]);
 
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(true);
+
+  const navigate = useNavigate();
   const notificationRef = useRef(null);
   const userMenuRef = useRef(null);
-  const navigate = useNavigate();
 
-  // Fetch user profile and stats on mount
+  // ✅ Fetch real profile from backend on mount
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -45,12 +50,17 @@ function DashboardHome() {
       return;
     }
 
-    // Fetch user profile
     fetch(`${API_BASE}/api/profile/`, {
-      headers: { Authorization: `Token ${token}` },
+      headers: {
+        Authorization: `Token ${token}`,
+      },
     })
       .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch profile");
+        if (res.status === 401) {
+          localStorage.removeItem("token");
+          navigate("/login");
+          return null;
+        }
         return res.json();
       })
       .then((data) => {
@@ -67,7 +77,7 @@ function DashboardHome() {
       .catch((err) => console.error("Profile fetch error:", err))
       .finally(() => setProfileLoading(false));
 
-    // Fetch stats
+    // ✅ Fetch real stats (applications count etc.) — adjust endpoint as needed
     fetch(`${API_BASE}/api/applications/stats/`, {
       headers: { Authorization: `Token ${token}` },
     })
@@ -82,7 +92,7 @@ function DashboardHome() {
         }
       })
       .catch(() => {
-        // Stats endpoint may not exist yet
+        // Stats endpoint may not exist yet — silently use defaults
       });
   }, [navigate]);
 
@@ -100,7 +110,7 @@ function DashboardHome() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Logout function
+  // ✅ Real logout — calls backend to delete token
   const handleLogout = async () => {
     const token = localStorage.getItem("token");
     try {
@@ -154,6 +164,7 @@ function DashboardHome() {
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
+  // ✅ Generate initials from username
   const getInitials = (name) => {
     if (!name) return "U";
     return name
@@ -183,12 +194,14 @@ function DashboardHome() {
             <div className="row mb-4">
               <div className="col-12">
                 <div className="bg-gradient-primary rounded-3 p-4 text-white shadow-sm">
+                  {/* ✅ Real username from backend */}
                   <h2 className="mb-1">
                     Welcome back, {profileLoading ? "..." : user.name.split(" ")[0]}! 👋
                   </h2>
                   <p className="mb-0 opacity-75">
                     Here's what's happening with your job search today.
                   </p>
+                  {/* ✅ Profile completion warning */}
                   {!profileLoading && !user.is_complete && (
                     <div className="mt-2">
                       <span
@@ -204,7 +217,7 @@ function DashboardHome() {
               </div>
             </div>
 
-            {/* Stats Cards */}
+            {/* ✅ Stats Cards — real data from backend */}
             <div className="row mb-4">
               {[
                 {
@@ -295,7 +308,7 @@ function DashboardHome() {
               </div>
             </div>
 
-            {/* Trending Jobs */}
+            {/* Trending Jobs - Enhanced Style */}
             <div className="row">
               <div className="col-12">
                 <div className="card border-0 shadow-sm overflow-hidden">
@@ -366,7 +379,7 @@ function DashboardHome() {
 
   return (
     <div className="container-fluid p-0">
-      {/* Top Navigation */}
+      {/* ✅ Top Navigation */}
       <nav className="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top">
         <div className="container-fluid">
           <button
@@ -409,7 +422,8 @@ function DashboardHome() {
 
           {/* Right Side */}
           <div className="d-flex align-items-center gap-3">
-            {/* Notifications */}
+
+            {/* 🔔 Notifications */}
             <div className="position-relative" ref={notificationRef}>
               <button
                 className="btn btn-link text-dark position-relative p-1"
@@ -464,18 +478,20 @@ function DashboardHome() {
               )}
             </div>
 
-            {/* User Avatar + Menu */}
+            {/* ✅ User Avatar + Menu with real name & logout */}
             <div className="position-relative" ref={userMenuRef}>
               <button
                 className="btn btn-link text-dark p-1 d-flex align-items-center"
                 onClick={() => setShowUserMenu(!showUserMenu)}
               >
+                {/* ✅ Avatar circle with real initials */}
                 <div
                   className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2 fw-bold"
                   style={{ width: "36px", height: "36px", fontSize: "14px", flexShrink: 0 }}
                 >
                   {profileLoading ? "..." : getInitials(user.name)}
                 </div>
+                {/* ✅ Real username from backend */}
                 <span className="d-none d-md-inline fw-semibold">
                   {profileLoading ? "Loading..." : user.name}
                 </span>
@@ -488,7 +504,8 @@ function DashboardHome() {
                 <div className="position-absolute end-0 mt-2" style={{ zIndex: 1000, minWidth: "220px" }}>
                   <div className="card shadow-sm">
                     <div className="card-body p-0">
-                      {/* User info header */}
+
+                      {/* ✅ User info header */}
                       <div className="p-3 border-bottom d-flex align-items-center gap-2">
                         <div
                           className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold flex-shrink-0"
@@ -523,6 +540,7 @@ function DashboardHome() {
                       </button>
 
                       <div className="border-top">
+                        {/* ✅ Real logout button */}
                         <button
                           className="dropdown-item d-flex align-items-center p-2 w-100 text-start border-0 bg-transparent text-danger"
                           onClick={handleLogout}

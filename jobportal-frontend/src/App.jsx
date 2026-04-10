@@ -1,4 +1,3 @@
-import React from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -14,29 +13,29 @@ import ErrorPage from "./components/Error";
 import Login from "./Login";
 import Register from "./register";
 
+
 import Home from "./Home";
+
 import DashboardHome from "./job-seeker/DashboardHome";
+
+// 🔥 EMPLOYER IMPORTS
 import EmployerDashboard from "./employer/EmployerDashboard";
 
-// ADMIN IMPORTS
-import AdminDashboard from "./admin/AdminDashboard";
-import Users from "./admin/Users";
-
-// Protected Route
-function ProtectedRoute({ allowedRoles }) {
+// 🔐 Protected Route
+function ProtectedRoute({ allowedRole }) {
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
 
   if (!token) return <Navigate to="/login" />;
 
-  if (allowedRoles && !allowedRoles.includes(role)) {
+  if (allowedRole && role !== allowedRole) {
     return <Navigate to="/login" />;
   }
 
   return <Outlet />;
 }
 
-// PUBLIC LAYOUT
+// 🌐 PUBLIC LAYOUT
 function PublicLayout() {
   return (
     <>
@@ -47,7 +46,7 @@ function PublicLayout() {
   );
 }
 
-// DASHBOARD LAYOUT
+// 🔥 DASHBOARD LAYOUT
 function DashboardLayout() {
   return (
     <>
@@ -62,36 +61,33 @@ function App() {
     <Router>
       <Routes>
 
-        {/* PUBLIC ROUTES */}
+        {/* 🌐 PUBLIC ROUTES */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
         </Route>
 
-        {/* ADMIN ROUTES */}
-        <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+        {/* 🔐 EMPLOYER ROUTES */}
+        <Route element={<ProtectedRoute allowedRole="employer" />}>
           <Route element={<DashboardLayout />}>
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/users" element={<Users />} />
-          </Route>
-        </Route>
 
-        {/* EMPLOYER ROUTES */}
-        <Route element={<ProtectedRoute allowedRoles={["employer"]} />}>
-          <Route element={<DashboardLayout />}>
+            {/* Employer Dashboard */}
             <Route path="/employer" element={<EmployerDashboard />} />
+
+            
+
           </Route>
         </Route>
 
-        {/* JOBSEEKER ROUTES */}
-        <Route element={<ProtectedRoute allowedRoles={["jobseeker"]} />}>
+        {/* 🔐 JOBSEEKER ROUTES */}
+        <Route element={<ProtectedRoute allowedRole="jobseeker" />}>
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard/*" element={<DashboardHome />} />
           </Route>
         </Route>
 
-        {/* 404 */}
+        {/* ❌ 404 */}
         <Route path="*" element={<ErrorPage />} />
 
       </Routes>
