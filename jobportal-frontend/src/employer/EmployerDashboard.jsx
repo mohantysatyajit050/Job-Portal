@@ -20,7 +20,7 @@ function EmployerDashboard() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await api.get("/profile/");
+        const response = await api.get("/users/profile/");
         setUserProfile({
           username: response.data.username,
           email: response.data.email,
@@ -63,7 +63,7 @@ function EmployerDashboard() {
 
   const handleLogout = async () => {
     try {
-      await api.post("/logout/");
+      await api.post("/users/logout/");
       localStorage.removeItem("token");
       window.location.href = "/";
     } catch (error) {

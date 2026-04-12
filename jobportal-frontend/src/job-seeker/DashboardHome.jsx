@@ -50,7 +50,8 @@ function DashboardHome() {
       return;
     }
 
-    fetch(`${API_BASE}/api/profile/`, {
+    // Fetch Profile
+    fetch(`${API_BASE}/api/users/profile/`, {
       headers: {
         Authorization: `Token ${token}`,
       },
@@ -77,22 +78,35 @@ function DashboardHome() {
       .catch((err) => console.error("Profile fetch error:", err))
       .finally(() => setProfileLoading(false));
 
-    // ✅ Fetch real stats (applications count etc.) — adjust endpoint as needed
-    fetch(`${API_BASE}/api/applications/stats/`, {
+    // ✅ Fetch real stats safely
+    fetch(`${API_BASE}/api/users/applications/stats/`, {
       headers: { Authorization: `Token ${token}` },
     })
-      .then((res) => res.ok ? res.json() : null)
-      .then((data) => {
-        if (data) {
-          setStats({
-            applications: data.total_applications ?? 0,
-            interviews: data.interviews ?? 0,
-            jobMatches: data.job_matches ?? 0,
-          });
+      .then(async (res) => {
+        if (!res.ok) {
+          // ❌ API not found or error
+          console.warn("Stats API not available:", res.status);
+          return null;
+        }
+
+        try {
+          return await res.json();
+        } catch (err) {
+          console.error("Invalid JSON from stats API");
+          return null;
         }
       })
-      .catch(() => {
-        // Stats endpoint may not exist yet — silently use defaults
+      .then((data) => {
+        if (!data) return;
+
+        setStats({
+          applications: data.total_applications ?? 0,
+          interviews: data.interviews ?? 0,
+          jobMatches: data.job_matches ?? 0,
+        });
+      })
+      .catch((err) => {
+        console.error("Stats fetch error:", err);
       });
   }, [navigate]);
 
@@ -114,7 +128,7 @@ function DashboardHome() {
   const handleLogout = async () => {
     const token = localStorage.getItem("token");
     try {
-      await fetch(`${API_BASE}/api/logout/`, {
+      await fetch(`${API_BASE}/api/users/logout/`, {
         method: "POST",
         headers: {
           Authorization: `Token ${token}`,
@@ -133,6 +147,7 @@ function DashboardHome() {
 
   const closeSidebar = () => {
     const offcanvasEl = document.getElementById("sidebar");
+    // Check if bootstrap is loaded on window
     const bsOffcanvas = window.bootstrap?.Offcanvas?.getInstance(offcanvasEl);
     if (bsOffcanvas) bsOffcanvas.hide();
   };
@@ -387,6 +402,8 @@ function DashboardHome() {
             type="button"
             data-bs-toggle="offcanvas"
             data-bs-target="#sidebar"
+            aria-controls="sidebar"
+            aria-label="Toggle navigation"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -565,6 +582,8 @@ function DashboardHome() {
         <div
           className="offcanvas-md offcanvas-start bg-white border-end col-md-3 col-lg-2 p-0"
           id="sidebar"
+          tabIndex="-1"
+          aria-labelledby="sidebarLabel"
           style={{ minHeight: "calc(100vh - 56px)" }}
         >
           <div className="p-3 border-bottom">

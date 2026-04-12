@@ -139,3 +139,25 @@ def logout(request):
         return Response({"message": "Logout successful"}, status=status.HTTP_200_OK)
     except:
         return Response({"error": "Error during logout"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+from jobs.models import Application
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def application_stats(request):
+    user = request.user
+
+    total_applications = Application.objects.filter(applicant=user).count()
+
+    accepted = Application.objects.filter(applicant=user, status='accepted').count()
+    rejected = Application.objects.filter(applicant=user, status='rejected').count()
+    pending = Application.objects.filter(applicant=user, status='pending').count()
+
+    return Response({
+        "total_applications": total_applications,
+        "accepted": accepted,
+        "rejected": rejected,
+        "pending": pending,
+        "interviews": accepted,
+        "job_matches": 0
+    })

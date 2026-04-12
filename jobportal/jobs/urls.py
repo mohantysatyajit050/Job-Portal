@@ -9,6 +9,12 @@ from .views import (
     MyApplicationsView,
     JobApplicantsView,
     UpdateApplicationStatusView,
+
+    # ✅ ADMIN VIEWS (ADD THESE)
+    AdminJobListView,
+    AdminJobApplicantsView,
+    AdminShortlistCandidateView,
+    AdminShortlistedCandidatesView,
 )
 
 urlpatterns = [
@@ -29,4 +35,13 @@ urlpatterns = [
     path('<int:job_id>/applicants/', JobApplicantsView.as_view(), name='job-applicants'),
 
     path('applications/<int:pk>/status/', UpdateApplicationStatusView.as_view(), name='update-status'),
+
+    # 🔥 ADMIN ROUTES
+path('admin/jobs/', AdminJobListView.as_view(), name='admin-job-list'),
+
+path('admin/jobs/<int:job_id>/applicants/', AdminJobApplicantsView.as_view(), name='admin-job-applicants'),
+
+path('admin/applications/<int:pk>/shortlist/', AdminShortlistCandidateView.as_view(), name='admin-shortlist'),
+
+path('admin/jobs/<int:job_id>/shortlisted/', AdminShortlistedCandidatesView.as_view(), name='admin-shortlisted'),
 ]

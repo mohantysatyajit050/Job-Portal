@@ -1,3 +1,4 @@
+from .permissions import IsAdminUserRole
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
@@ -9,6 +10,50 @@ from django.shortcuts import get_object_or_404
 from .models import Job, Application
 from .serializers import JobSerializer, ApplicationSerializer
 
+
+
+class AdminJobListView(generics.ListAPIView):
+    queryset = Job.objects.all().order_by("-created_at")
+    serializer_class = JobSerializer
+    permission_classes = [IsAuthenticated, IsAdminUserRole]
+
+
+
+class AdminJobApplicantsView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUserRole]
+
+    def get(self, request, job_id):
+        job = get_object_or_404(Job, id=job_id)
+
+        applications = Application.objects.filter(job=job)
+        serializer = ApplicationSerializer(applications, many=True)
+
+        return Response(serializer.data)
+    
+class AdminShortlistCandidateView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUserRole]
+
+    def patch(self, request, pk):
+        application = get_object_or_404(Application, id=pk)
+
+        application.status = "shortlisted"
+        application.is_admin_selected = True
+        application.save()
+
+        return Response({"message": "Candidate shortlisted by admin"})
+    
+class AdminShortlistedCandidatesView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUserRole]
+
+    def get(self, request, job_id):
+        shortlisted = Application.objects.filter(
+            job_id=job_id,
+            is_admin_selected=True
+        )
+
+        serializer = ApplicationSerializer(shortlisted, many=True)
+        return Response(serializer.data)
+    
 
 # 🔹 Skill-based job filtering
 class FilteredJobListView(APIView):
@@ -139,7 +184,10 @@ class JobApplicantsView(APIView):
         if job.employer != request.user:
             raise PermissionDenied("Not allowed")
 
-        applications = Application.objects.filter(job=job)
+        applications = Application.objects.filter(
+           job=job,
+           is_admin_selected=True   # ✅ Only shortlisted shown
+      )
         serializer = ApplicationSerializer(applications, many=True)
 
         return Response(serializer.data)
@@ -159,7 +207,7 @@ class UpdateApplicationStatusView(APIView):
         status = request.data.get("status")
 
         # ✅ Allow all 3 statuses
-        if status not in ["pending", "accepted", "rejected"]:
+        if status not in ["pending", "shortlisted", "accepted", "rejected"]:
             return Response({"error": "Invalid status"}, status=400)
 
         application.status = status

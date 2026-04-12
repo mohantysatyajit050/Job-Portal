@@ -11,20 +11,17 @@ class Job(models.Model):
     location = models.CharField(max_length=200)
     salary = models.IntegerField()
     description = models.TextField()
-
-    # Skills required for matching
     skills_required = models.TextField(default="Python")
-
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.title
 
 
-# 🔹 Application Model
 class Application(models.Model):
     STATUS_CHOICES = [
         ("pending", "Pending"),
+        ("shortlisted", "Shortlisted"), 
         ("accepted", "Accepted"),
         ("rejected", "Rejected"),
     ]
@@ -32,17 +29,20 @@ class Application(models.Model):
     job = models.ForeignKey(Job, on_delete=models.CASCADE)
     applicant = models.ForeignKey(User, on_delete=models.CASCADE)
 
-    # Resume upload
     resume = models.FileField(upload_to='resumes/', null=True, blank=True)
 
-    # ✅ Status field (default = pending)
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
         default="pending"
     )
 
+    # ✅ FIX (IMPORTANT)
+    is_admin_selected = models.BooleanField(default=False)
+
     applied_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.applicant} applied to {self.job}"
+    
+    

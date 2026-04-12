@@ -6,6 +6,7 @@ class Profile(models.Model):
     ROLE_CHOICES = (
         ('jobseeker', 'Job Seeker'),
         ('employer', 'Employer'),
+        ('admin', 'Admin'),
     )
 
     user = models.OneToOneField(

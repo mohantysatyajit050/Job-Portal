@@ -40,7 +40,7 @@ function Applicants({ jobId }) {
   // 🔹 Update status
   const updateStatus = async (id, status) => {
     try {
-      await api.patch(`/api/jobs/applications/${id}/status/`, {
+      await api.patch(`/jobs/applications/${id}/status/`, {
         status,
       });
 
